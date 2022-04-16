@@ -1,3 +1,4 @@
 .idea/
 .vscode/
 dh-url-shortener
+coverage.out
