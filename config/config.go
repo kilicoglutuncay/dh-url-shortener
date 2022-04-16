@@ -2,7 +2,6 @@ package config
 
 import (
 	"log"
-	"os"
 )
 
 type Config struct {
@@ -10,9 +9,9 @@ type Config struct {
 	Logger *log.Logger
 }
 
-func NewConfig() *Config {
+func NewConfig(logger *log.Logger) *Config {
 	return &Config{
 		Addr:   ":8080",
-		Logger: log.New(os.Stdout, "", log.LstdFlags),
+		Logger: logger,
 	}
 }

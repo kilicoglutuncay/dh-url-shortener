@@ -5,10 +5,12 @@ import (
 	"dh-url-shortener/handler"
 	"dh-url-shortener/service"
 	"log"
+	"os"
 )
 
 func main() {
-	c := config.NewConfig()
+
+	c := config.NewConfig(log.New(os.Stdout, "", log.LstdFlags))
 	s := NewHTTPServer(c)
 
 	shortenerService := service.Shortener{}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"dh-url-shortener/config"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +15,8 @@ import (
 func TestHttpServer_AccessLogMiddleware(t *testing.T) {
 	buf := new(bytes.Buffer)
 	logger := log.New(buf, "", log.LstdFlags)
-	s := NewHTTPServer(logger)
+	c := config.NewConfig(logger)
+	s := NewHTTPServer(c)
 
 	nextHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
