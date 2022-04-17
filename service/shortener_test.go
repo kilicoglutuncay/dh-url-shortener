@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const longURL = "https://www.yemeksepeti.com/istanbul"
+
 // TestShortener_Shorten should return error when url is empty
 func TestShortener_Shorten_ShouldReturnErrorWhenLongURLIsEmpty(t *testing.T) {
 	controller := gomock.NewController(t)
@@ -68,4 +70,32 @@ func TestShortener_Shorten_ShouldReturnDifferentShortUrlWhenIfItIsUsedBefore(t *
 	expected := "/11086bd"
 	assert.Nil(t, err)
 	assert.Equal(t, expected, shortURL)
+}
+
+func TestShortener_Expand_ShouldReturnErrorWhenHashNotFound(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	mockRepo := mocks.NewMockRepository(controller)
+	mockRepo.EXPECT().Get(gomock.Any()).Return("", errors.New("hash not found")).Times(1)
+
+	s := Shortener{Repository: mockRepo}
+	hash := "6bf0d62"
+	longURL, err := s.Expand(hash)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", longURL)
+}
+
+func TestShortener_Expand_ShouldReturnLongURL(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	mockRepo := mocks.NewMockRepository(controller)
+	mockRepo.EXPECT().Get(gomock.Any()).Return(longURL, nil).Times(1)
+
+	s := Shortener{Repository: mockRepo}
+	hash := "6bf0d62"
+	url, err := s.Expand(hash)
+
+	assert.Nil(t, err)
+	assert.Equal(t, longURL, url)
 }

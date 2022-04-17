@@ -44,6 +44,11 @@ func (s Shortener) createShortURL(hash string) string {
 	return fmt.Sprintf("%s/%s", s.ShortURLDomain, hash)
 }
 
-func (s Shortener) Expand(shortURL string) (string, error) {
-	return "", nil
+func (s Shortener) Expand(hash string) (string, error) {
+	url, err := s.Repository.Get(hash)
+	if err != nil {
+		return "", err
+	}
+
+	return url, nil
 }
