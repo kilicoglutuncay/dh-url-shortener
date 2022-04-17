@@ -12,8 +12,11 @@ func NewInMemoryRepository(data map[string]string) *InMemoryRepository {
 	}
 }
 
-func (i InMemoryRepository) Get(s string) (string, error) {
-	return "", nil
+func (i InMemoryRepository) Get(key string) (string, error) {
+	if value, ok := i.data[key]; ok {
+		return value, nil
+	}
+	return "", errors.New(key + " not found")
 }
 
 func (i InMemoryRepository) Set(key string, value string) error {
