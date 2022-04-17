@@ -13,6 +13,7 @@ type UrlHandler struct {
 
 type ShortenerService interface {
 	Shorten(string) (string, error)
+	Expand(string) (string, error)
 }
 
 // Shorten creates a new short URL
@@ -39,6 +40,22 @@ func (h UrlHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_, _ = w.Write([]byte(shortURL))
+}
+
+func (h UrlHandler) Expand(w http.ResponseWriter, r *http.Request) {
+	hash := r.URL.Path[1:]
+	if len(hash) != 7 {
+		http.Error(w, errors.New("invalid hash").Error(), http.StatusBadRequest)
+		return
+	}
+
+	longURL, err := h.ShortenerService.Expand(hash)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	http.Redirect(w, r, longURL, http.StatusFound)
 }
 
 const ErrInvalidURL = "invalid url"

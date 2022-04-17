@@ -43,3 +43,7 @@ func (s Shortener) createShortURLHash(url string, collisionCounter int) string {
 func (s Shortener) createShortURL(hash string) string {
 	return fmt.Sprintf("%s/%s", s.ShortURLDomain, hash)
 }
+
+func (s Shortener) Expand(shortURL string) (string, error) {
+	return "", nil
+}
