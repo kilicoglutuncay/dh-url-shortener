@@ -2,7 +2,10 @@ package handler
 
 import (
 	"bytes"
+	"dh-url-shortener/repository"
+	"dh-url-shortener/service"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +15,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
+
+const shortUrlDomain = "http://localhost:8080"
+const longURL = "https://www.yemeksepeti.com/istanbul"
 
 func TestShortenerHandler_Shorten_ShouldReturnBadRequestWhenShortenRequestIsNotContainsValidJSON(t *testing.T) {
 	controller := gomock.NewController(t)
@@ -53,7 +59,7 @@ func TestShortenerHandler_Shorten_ShouldReturnInternalServerErrorWhenShortenerSe
 
 	handler := ShortenerHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(`{"url": "https://www.yemeksepeti.com/istanbul"}`)))
+	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 
 	handler.Create(resp, req)
 
@@ -61,7 +67,7 @@ func TestShortenerHandler_Shorten_ShouldReturnInternalServerErrorWhenShortenerSe
 }
 
 func TestShortenerHandler_Shorten_ShortenedURL(t *testing.T) {
-	shortenedURL := "http://localhost:8080/tTeEsT"
+	shortenedURL := shortUrlDomain + "/tTeEsT"
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	mockShortenerService := mocks.NewMockShortenerService(controller)
@@ -69,7 +75,7 @@ func TestShortenerHandler_Shorten_ShortenedURL(t *testing.T) {
 
 	handler := ShortenerHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(`{"url": "https://www.yemeksepeti.com/istanbul"}`)))
+	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 
 	handler.Create(resp, req)
 
@@ -106,4 +112,20 @@ func TestShortenRequest_validate(t *testing.T) {
 			assert.Equal(t, tt.wantErr, actualErr != nil)
 		})
 	}
+}
+
+// TestShortenerHandler_Create tests integration of short url creation process
+func TestShortenerHandler_Create(t *testing.T) {
+	data := make(map[string]string)
+	repo := repository.NewInMemoryRepository(data)
+	svc := service.Shortener{Repository: repo, ShortURLDomain: shortUrlDomain}
+	handler := ShortenerHandler{ShortenerService: svc}
+
+	resp := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
+	handler.Create(resp, req)
+
+	assert.Equal(t, http.StatusCreated, resp.Code)
+	assert.Equal(t, shortUrlDomain+"/6bf0d62", resp.Body.String())
+	assert.Equal(t, data["6bf0d62"], longURL)
 }
