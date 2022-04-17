@@ -14,9 +14,9 @@ func main() {
 	s := NewHTTPServer(c)
 
 	shortenerService := service.Shortener{}
-	h := handler.ShortenerHandler{ShortenerService: shortenerService}
+	h := handler.UrlHandler{ShortenerService: shortenerService}
 
-	s.Post("/short", h.Create, s.AccessLogMiddleware)
+	s.Post("/short", h.Shorten, s.AccessLogMiddleware)
 
 	log.Fatal(s.ListenAndServe())
 }

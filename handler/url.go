@@ -7,7 +7,7 @@ import (
 	"net/url"
 )
 
-type ShortenerHandler struct {
+type UrlHandler struct {
 	ShortenerService ShortenerService
 }
 
@@ -15,8 +15,8 @@ type ShortenerService interface {
 	Shorten(string) (string, error)
 }
 
-// Create creates a new short URL
-func (h ShortenerHandler) Create(w http.ResponseWriter, r *http.Request) {
+// Shorten creates a new short URL
+func (h UrlHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 
 	var sr ShortenRequest
 	err := json.NewDecoder(r.Body).Decode(&sr)

@@ -25,14 +25,14 @@ func TestShortenerHandler_Shorten_ShouldReturnBadRequestWhenShortenRequestIsNotC
 	mockShortenerService := mocks.NewMockShortenerService(controller)
 	mockShortenerService.EXPECT().Shorten(gomock.Any()).Return("", nil).Times(0)
 
-	handler := ShortenerHandler{
+	handler := UrlHandler{
 		ShortenerService: mockShortenerService,
 	}
 	resp := httptest.NewRecorder()
 
 	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(`invalid json`)))
 
-	handler.Create(resp, req)
+	handler.Shorten(resp, req)
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
@@ -42,11 +42,11 @@ func TestShortenerHandler_Shorten_ShouldReturnBadRequestWhenShortenRequestIsNotV
 	mockShortenerService := mocks.NewMockShortenerService(controller)
 	mockShortenerService.EXPECT().Shorten(gomock.Any()).Return("", nil).Times(0)
 
-	handler := ShortenerHandler{ShortenerService: mockShortenerService}
+	handler := UrlHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(`{"url": "invalid url"}`)))
 
-	handler.Create(resp, req)
+	handler.Shorten(resp, req)
 
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
@@ -57,11 +57,11 @@ func TestShortenerHandler_Shorten_ShouldReturnInternalServerErrorWhenShortenerSe
 	mockShortenerService := mocks.NewMockShortenerService(controller)
 	mockShortenerService.EXPECT().Shorten(gomock.Any()).Return("", errors.New("service error")).Times(1)
 
-	handler := ShortenerHandler{ShortenerService: mockShortenerService}
+	handler := UrlHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 
-	handler.Create(resp, req)
+	handler.Shorten(resp, req)
 
 	assert.Equal(t, http.StatusInternalServerError, resp.Code)
 }
@@ -73,11 +73,11 @@ func TestShortenerHandler_Shorten_ShortenedURL(t *testing.T) {
 	mockShortenerService := mocks.NewMockShortenerService(controller)
 	mockShortenerService.EXPECT().Shorten(gomock.Any()).Return(shortenedURL, nil).Times(1)
 
-	handler := ShortenerHandler{ShortenerService: mockShortenerService}
+	handler := UrlHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 
-	handler.Create(resp, req)
+	handler.Shorten(resp, req)
 
 	assert.Equal(t, http.StatusCreated, resp.Code)
 	assert.Equal(t, shortenedURL, resp.Body.String())
@@ -119,11 +119,11 @@ func TestShortenerHandler_Create(t *testing.T) {
 	data := make(map[string]string)
 	repo := repository.NewInMemoryRepository(data)
 	svc := service.Shortener{Repository: repo, ShortURLDomain: shortUrlDomain}
-	handler := ShortenerHandler{ShortenerService: svc}
+	handler := UrlHandler{ShortenerService: svc}
 
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
-	handler.Create(resp, req)
+	handler.Shorten(resp, req)
 
 	assert.Equal(t, http.StatusCreated, resp.Code)
 	assert.Equal(t, shortUrlDomain+"/6bf0d62", resp.Body.String())
