@@ -34,7 +34,7 @@ func TestShortener_Shorten_ShouldReturnFirstSevenCharsOfMd5Hash(t *testing.T) {
 	s := Shortener{Repository: mockRepo}
 	longURL := "https://www.yemeksepeti.com/istanbul"
 	shortURL, err := s.Shorten(longURL)
-	expected := "6bf0d62"
+	expected := "/6bf0d62"
 	assert.Nil(t, err)
 	assert.Equal(t, expected, shortURL)
 }
@@ -49,7 +49,7 @@ func TestShortener_Shorten_ShouldReturnShortUrlWhenIfItIsNotUsedBefore(t *testin
 	s := Shortener{Repository: mockRepo}
 	longURL := "https://www.yemeksepeti.com/istanbul"
 	shortURL, err := s.Shorten(longURL)
-	expected := "6bf0d62"
+	expected := "/6bf0d62"
 	assert.Nil(t, err)
 	assert.Equal(t, expected, shortURL)
 }
@@ -65,7 +65,7 @@ func TestShortener_Shorten_ShouldReturnDifferentShortUrlWhenIfItIsUsedBefore(t *
 
 	s := Shortener{Repository: mockRepo}
 	shortURL, err := s.Shorten(longURL)
-	expected := "11086bd"
+	expected := "/11086bd"
 	assert.Nil(t, err)
 	assert.Equal(t, expected, shortURL)
 }
