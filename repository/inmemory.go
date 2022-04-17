@@ -6,6 +6,12 @@ type InMemoryRepository struct {
 	data map[string]string
 }
 
+func NewInMemoryRepository(data map[string]string) *InMemoryRepository {
+	return &InMemoryRepository{
+		data: data,
+	}
+}
+
 func (i InMemoryRepository) Get(s string) (string, error) {
 	return "", nil
 }
