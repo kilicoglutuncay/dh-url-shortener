@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	model "dh-url-shortener/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -34,10 +35,10 @@ func (m *MockDB) EXPECT() *MockDBMockRecorder {
 }
 
 // Data mocks base method.
-func (m *MockDB) Data() map[string]string {
+func (m *MockDB) Data() map[string]model.RedirectionData {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Data")
-	ret0, _ := ret[0].(map[string]string)
+	ret0, _ := ret[0].(map[string]model.RedirectionData)
 	return ret0
 }
 
@@ -48,10 +49,10 @@ func (mr *MockDBMockRecorder) Data() *gomock.Call {
 }
 
 // Get mocks base method.
-func (m *MockDB) Get(arg0 string) (string, error) {
+func (m *MockDB) Get(arg0 string) (model.RedirectionData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(model.RedirectionData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -62,8 +63,22 @@ func (mr *MockDBMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDB)(nil).Get), arg0)
 }
 
+// Hit mocks base method.
+func (m *MockDB) Hit(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Hit", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Hit indicates an expected call of Hit.
+func (mr *MockDBMockRecorder) Hit(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Hit", reflect.TypeOf((*MockDB)(nil).Hit), arg0)
+}
+
 // Restore mocks base method.
-func (m *MockDB) Restore(arg0 map[string]string) {
+func (m *MockDB) Restore(arg0 map[string]model.RedirectionData) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Restore", arg0)
 }
@@ -75,7 +90,7 @@ func (mr *MockDBMockRecorder) Restore(arg0 interface{}) *gomock.Call {
 }
 
 // Set mocks base method.
-func (m *MockDB) Set(arg0, arg1 string) error {
+func (m *MockDB) Set(arg0 string, arg1 model.RedirectionData) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", arg0, arg1)
 	ret0, _ := ret[0].(error)

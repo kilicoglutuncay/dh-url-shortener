@@ -1,6 +1,7 @@
 package service
 
 import (
+	"dh-url-shortener/model"
 	"errors"
 	"testing"
 
@@ -57,8 +58,8 @@ func TestShortener_Shorten_ShouldReturnDifferentShortUrlWhenIfItIsUsedBefore(t *
 	defer controller.Finish()
 	mockDB := mocks.NewMockDB(controller)
 	gomock.InOrder(
-		mockDB.EXPECT().Set("05bf184", longURL).Return(errors.New("hash already exists")).Times(1),
-		mockDB.EXPECT().Set("8d505df", longURL).Return(nil).Times(1),
+		mockDB.EXPECT().Set("05bf184", model.RedirectionData{OriginalURL: longURL}).Return(errors.New("hash already exists")).Times(1),
+		mockDB.EXPECT().Set("8d505df", model.RedirectionData{OriginalURL: longURL}).Return(nil).Times(1),
 	)
 
 	s := Shortener{DB: mockDB}
@@ -72,21 +73,22 @@ func TestShortener_Expand_ShouldReturnErrorWhenHashNotFound(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	mockDB := mocks.NewMockDB(controller)
-	mockDB.EXPECT().Get(gomock.Any()).Return("", errors.New("hash not found")).Times(1)
+	mockDB.EXPECT().Get(gomock.Any()).Return(model.RedirectionData{}, errors.New("hash not found")).Times(1)
 
 	s := Shortener{DB: mockDB}
 	hash := "05bf184"
-	longURL, err := s.Expand(hash)
+	originalURL, err := s.Expand(hash)
 
 	assert.Error(t, err)
-	assert.Equal(t, "", longURL)
+	assert.Equal(t, "", originalURL)
 }
 
 func TestShortener_Expand_ShouldReturnLongURL(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	mockDB := mocks.NewMockDB(controller)
-	mockDB.EXPECT().Get(gomock.Any()).Return(longURL, nil).Times(1)
+	mockDB.EXPECT().Get(gomock.Any()).Return(model.RedirectionData{OriginalURL: longURL}, nil).Times(1)
+	mockDB.EXPECT().Hit(gomock.Any()).Return( nil).Times(1)
 
 	s := Shortener{DB: mockDB}
 	hash := "05bf184"
@@ -94,4 +96,18 @@ func TestShortener_Expand_ShouldReturnLongURL(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, longURL, url)
+}
+func TestShortener_Expand_ShouldReturnErrorWhenCantIncreaseHit(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	mockDB := mocks.NewMockDB(controller)
+	mockDB.EXPECT().Get(gomock.Any()).Return(model.RedirectionData{OriginalURL: longURL}, nil).Times(1)
+	mockDB.EXPECT().Hit(gomock.Any()).Return( errors.New("key not found")).Times(1)
+
+	s := Shortener{DB: mockDB}
+	hash := "05bf184"
+	url, err := s.Expand(hash)
+
+	assert.Error(t, err)
+	assert.Equal(t, "", url)
 }

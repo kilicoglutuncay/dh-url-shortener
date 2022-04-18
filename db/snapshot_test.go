@@ -1,6 +1,7 @@
 package db
 
 import (
+	"dh-url-shortener/model"
 	"encoding/json"
 	"os"
 	"testing"
@@ -17,7 +18,7 @@ func TestNewSnapshot_Restore_ShouldNotReturnErrorWhenSnapshotFileCantOpen(t *tes
 	snapshot := NewSnapshot("not-existing-file-location", testSnapshotInterval)
 
 	err := snapshot.Restore(inMemDB)
-	expectedData := map[string]string{}
+	expectedData := map[string]model.RedirectionData{}
 	assert.Nil(t, err)
 	assert.Equal(t, expectedData, inMemDB.Data())
 }
@@ -27,8 +28,9 @@ func TestNewSnapshot_Restore_ShouldReturnErrorWhenFileContentIsNotEncodeable(t *
 	snapshot := NewSnapshot(testSnapshotFile, testSnapshotInterval)
 
 	writeDataToSnapshot(t, []byte("not encodeable"), testSnapshotFile)
+	defer os.Truncate(testSnapshotFile, 0)
 	err := snapshot.Restore(inMemDB)
-	expectedData := map[string]string{}
+	expectedData := map[string]model.RedirectionData{}
 	assert.Error(t, err)
 	assert.Equal(t, expectedData, inMemDB.Data())
 }
@@ -36,16 +38,18 @@ func TestNewSnapshot_Restore_ShouldReturnErrorWhenFileContentIsNotEncodeable(t *
 func TestSnapshot_Restore(t *testing.T) {
 	inMemDB := NewInMemoryDB()
 	snapshot := NewSnapshot(testSnapshotFile, testSnapshotInterval)
-	testData := map[string]string{
-		"key1": "value1",
-		"key2": "value2",
-		"key3": "value3",
+	testData := map[string]model.RedirectionData{
+		"key1": {OriginalURL: "value1"},
+		"key2": {OriginalURL:"value2"},
+		"key3": {OriginalURL:"value3"},
 	}
 	d, _ := json.Marshal(testData)
 	writeDataToSnapshot(t, d, testSnapshotFile)
+	defer os.Truncate(testSnapshotFile, 0)
 	err := snapshot.Restore(inMemDB)
 	assert.Nil(t, err)
 	assert.Equal(t, testData, inMemDB.Data())
+
 }
 
 func writeDataToSnapshot(t *testing.T, data []byte, snapshotPath string) {

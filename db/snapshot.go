@@ -1,6 +1,7 @@
 package db
 
 import (
+	"dh-url-shortener/model"
 	"dh-url-shortener/service"
 	"encoding/json"
 	"io/ioutil"
@@ -44,7 +45,7 @@ func (s Snapshot) Restore(db service.DB) error {
 	}
 	defer file.Close()
 	byteValue, _ := ioutil.ReadAll(file)
-	var data map[string]string
+	var data map[string]model.RedirectionData
 	if len(byteValue) > 0 {
 		if err := json.Unmarshal(byteValue, &data); err != nil {
 			return err

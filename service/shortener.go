@@ -2,6 +2,7 @@ package service
 
 import (
 	"crypto/sha256"
+	"dh-url-shortener/model"
 	"fmt"
 )
 
@@ -11,10 +12,11 @@ type Shortener struct {
 }
 
 type DB interface {
-	Get(string) (string, error)
-	Set(string, string) error
-	Data() map[string]string
-	Restore(map[string]string)
+	Get(string) (model.RedirectionData, error)
+	Set(string, model.RedirectionData) error
+	Hit(string) error
+	Data() map[string]model.RedirectionData
+	Restore(map[string]model.RedirectionData)
 }
 
 func (s Shortener) Shorten(url string) (string, error) {
@@ -35,7 +37,7 @@ func (s Shortener) createShortURLHash(url string, collisionCounter int) string {
 	hash := fmt.Sprintf("%x", sha256.Sum256(input))
 	shortHash := hash[:7]
 
-	if err := s.DB.Set(shortHash, url); err != nil {
+	if err := s.DB.Set(shortHash, model.RedirectionData{OriginalURL: url, Hits: 0}); err != nil {
 		return s.createShortURLHash(url, collisionCounter+1)
 	}
 
@@ -47,10 +49,16 @@ func (s Shortener) createShortURL(hash string) string {
 }
 
 func (s Shortener) Expand(hash string) (string, error) {
-	url, err := s.DB.Get(hash)
+	redirectionData, err := s.DB.Get(hash)
 	if err != nil {
 		return "", err
 	}
 
-	return url, nil
+	redirectionData.Hits++
+	err = s.DB.Hit(hash)
+	if err != nil {
+		return "", err
+	}
+
+	return redirectionData.OriginalURL, nil
 }

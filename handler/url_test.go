@@ -125,10 +125,10 @@ func TestShortenerHandler_Create(t *testing.T) {
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 	handler.Shorten(resp, req)
-	longURLInDB, _ := InMemoryDB.Get("05bf184")
+	redirectionData, _ := InMemoryDB.Get("05bf184")
 	assert.Equal(t, http.StatusCreated, resp.Code)
 	assert.Equal(t, shortURLDomain+"/05bf184", resp.Body.String())
-	assert.Equal(t, longURL, longURLInDB)
+	assert.Equal(t, longURL, redirectionData.OriginalURL)
 }
 
 func TestUrlHandler_Expand_ShouldReturnBadRequestWhenHashSmallerThanSevenChar(t *testing.T) {
