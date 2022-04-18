@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 )
 
 type HTTPServer struct {
@@ -14,12 +15,12 @@ type HTTPServer struct {
 	Config     *config.Config
 }
 
-func NewHTTPServer(config *config.Config) *HTTPServer {
+func NewHTTPServer(c *config.Config) *HTTPServer {
 	mux := http.NewServeMux()
 	server := &HTTPServer{
 		ServerMux:  mux,
 		routeTable: make(map[string]http.HandlerFunc),
-		Config:     config,
+		Config:     c,
 	}
 
 	server.Get("/health", server.healthHandler, server.AccessLogMiddleware)
@@ -40,10 +41,18 @@ func (s *HTTPServer) Post(path string, handler http.HandlerFunc, middlewares ...
 	s.routeTable[http.MethodPost+" "+path] = handler
 }
 
+var (
+	shortenRe = regexp.MustCompile(`^/short/*$`)
+	expandRe  = regexp.MustCompile(`^/[a-z0-9A-Z]{7}$`)
+)
+
 func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if handler, ok := s.routeTable[r.Method+" "+r.URL.Path]; ok {
-		handler(w, r)
-	} else {
+	switch {
+	case r.Method == http.MethodPost && shortenRe.MatchString(r.URL.Path):
+		s.routeTable["POST /short"](w, r)
+	case r.Method == http.MethodGet && expandRe.MatchString(r.URL.Path):
+		s.routeTable["GET /"](w, r)
+	default:
 		http.NotFound(w, r)
 	}
 }
