@@ -40,8 +40,8 @@ func TestSnapshot_Restore(t *testing.T) {
 	snapshot := NewSnapshot(testSnapshotFile, testSnapshotInterval)
 	testData := map[string]model.RedirectionData{
 		"key1": {OriginalURL: "value1"},
-		"key2": {OriginalURL:"value2"},
-		"key3": {OriginalURL:"value3"},
+		"key2": {OriginalURL: "value2"},
+		"key3": {OriginalURL: "value3"},
 	}
 	d, _ := json.Marshal(testData)
 	writeDataToSnapshot(t, d, testSnapshotFile)
@@ -49,7 +49,6 @@ func TestSnapshot_Restore(t *testing.T) {
 	err := snapshot.Restore(inMemDB)
 	assert.Nil(t, err)
 	assert.Equal(t, testData, inMemDB.Data())
-
 }
 
 func writeDataToSnapshot(t *testing.T, data []byte, snapshotPath string) {

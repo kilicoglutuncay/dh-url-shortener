@@ -88,7 +88,7 @@ func TestShortener_Expand_ShouldReturnLongURL(t *testing.T) {
 	defer controller.Finish()
 	mockDB := mocks.NewMockDB(controller)
 	mockDB.EXPECT().Get(gomock.Any()).Return(model.RedirectionData{OriginalURL: longURL}, nil).Times(1)
-	mockDB.EXPECT().Hit(gomock.Any()).Return( nil).Times(1)
+	mockDB.EXPECT().Hit(gomock.Any()).Return(nil).Times(1)
 
 	s := Shortener{DB: mockDB}
 	hash := "05bf184"
@@ -102,7 +102,7 @@ func TestShortener_Expand_ShouldReturnErrorWhenCantIncreaseHit(t *testing.T) {
 	defer controller.Finish()
 	mockDB := mocks.NewMockDB(controller)
 	mockDB.EXPECT().Get(gomock.Any()).Return(model.RedirectionData{OriginalURL: longURL}, nil).Times(1)
-	mockDB.EXPECT().Hit(gomock.Any()).Return( errors.New("key not found")).Times(1)
+	mockDB.EXPECT().Hit(gomock.Any()).Return(errors.New("key not found")).Times(1)
 
 	s := Shortener{DB: mockDB}
 	hash := "05bf184"
