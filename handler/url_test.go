@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	mocks "dh-url-shortener/.mocks"
 
@@ -195,4 +196,25 @@ func TestURLHandler_List(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.Code)
 	assert.Equal(t, string(expectedResp), resp.Body.String())
+}
+
+func BenchmarkURLHandler_Expand(b *testing.B) {
+	inMemoryDB := db.NewInMemoryDB()
+	shortenerService := service.Shortener{DB: inMemoryDB, ShortURLDomain: "http://localhost:8080"}
+	h := URLHandler{ShortenerService: shortenerService}
+	_ = inMemoryDB.Set("05bf184", model.RedirectionData{OriginalURL: longURL, Hits: 0})
+	ss := db.NewSnapshot("../db/test_snapshot.db", time.Second*5)
+	_ = ss.Restore(inMemoryDB)
+	go ss.SavePeriodically(inMemoryDB)
+	b.ResetTimer()
+	b.ReportAllocs()
+	b.SetParallelism(16000)
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			resp := httptest.NewRecorder()
+			req, _ := http.NewRequest(http.MethodGet, "/05bf184", nil)
+			h.Expand(resp, req)
+		}
+	})
+
 }

@@ -60,10 +60,13 @@ func (s Snapshot) SavePeriodically(db service.DB) {
 	ticker := time.NewTicker(s.SnapshotSaveInterval)
 
 	for {
-		<-ticker.C
-		err := s.snapshot(db)
-		if err != nil {
-			log.Fatalln(err)
+		select {
+		case <-ticker.C:
+			err := s.snapshot(db)
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}
+
 	}
 }
