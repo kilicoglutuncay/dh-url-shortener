@@ -7,7 +7,7 @@ import (
 	"net/url"
 )
 
-type UrlHandler struct {
+type URLHandler struct {
 	ShortenerService ShortenerService
 }
 
@@ -16,9 +16,10 @@ type ShortenerService interface {
 	Expand(string) (string, error)
 }
 
-// Shorten creates a new short URL
-func (h UrlHandler) Shorten(w http.ResponseWriter, r *http.Request) {
+const shortURLHashLength = 7
 
+// Shorten creates a new short URL
+func (h URLHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 	var sr ShortenRequest
 	err := json.NewDecoder(r.Body).Decode(&sr)
 	if err != nil {
@@ -42,9 +43,9 @@ func (h UrlHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(shortURL))
 }
 
-func (h UrlHandler) Expand(w http.ResponseWriter, r *http.Request) {
+func (h URLHandler) Expand(w http.ResponseWriter, r *http.Request) {
 	hash := r.URL.Path[1:]
-	if len(hash) != 7 {
+	if len(hash) != shortURLHashLength {
 		http.Error(w, errors.New("invalid hash").Error(), http.StatusBadRequest)
 		return
 	}
