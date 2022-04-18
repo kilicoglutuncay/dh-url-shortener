@@ -14,16 +14,10 @@ const longURL = "https://www.yemeksepeti.com/istanbul"
 
 // TestShortener_Shorten should return error when url is empty
 func TestShortener_Shorten_ShouldReturnErrorWhenLongURLIsEmpty(t *testing.T) {
-	controller := gomock.NewController(t)
-	defer controller.Finish()
-	mockRepo := mocks.NewMockRepository(controller)
-	mockRepo.EXPECT().Set(gomock.Any(), gomock.Any()).Return(nil).Times(0)
+	s := Shortener{}
+	shortURL, err := s.Shorten("")
 
-	s := Shortener{Repository: mockRepo}
-	longURL := ""
-	shortURL, err := s.Shorten(longURL)
-	expected := "long url cannot be empty"
-	assert.Equal(t, expected, err.Error())
+	assert.Error(t, err)
 	assert.Equal(t, "", shortURL)
 }
 
@@ -31,10 +25,10 @@ func TestShortener_Shorten_ShouldReturnErrorWhenLongURLIsEmpty(t *testing.T) {
 func TestShortener_Shorten_ShouldReturnFirstSevenCharsOfMd5Hash(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	mockRepo := mocks.NewMockRepository(controller)
-	mockRepo.EXPECT().Set(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	mockDB := mocks.NewMockDB(controller)
+	mockDB.EXPECT().Set(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 
-	s := Shortener{Repository: mockRepo}
+	s := Shortener{DB: mockDB}
 	longURL := "https://www.yemeksepeti.com/istanbul"
 	shortURL, err := s.Shorten(longURL)
 	expected := "/05bf184"
@@ -46,10 +40,10 @@ func TestShortener_Shorten_ShouldReturnFirstSevenCharsOfMd5Hash(t *testing.T) {
 func TestShortener_Shorten_ShouldReturnShortUrlWhenIfItIsNotUsedBefore(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	mockRepo := mocks.NewMockRepository(controller)
-	mockRepo.EXPECT().Set(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	mockDB := mocks.NewMockDB(controller)
+	mockDB.EXPECT().Set(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 
-	s := Shortener{Repository: mockRepo}
+	s := Shortener{DB: mockDB}
 	longURL := "https://www.yemeksepeti.com/istanbul"
 	shortURL, err := s.Shorten(longURL)
 	expected := "/05bf184"
@@ -61,13 +55,13 @@ func TestShortener_Shorten_ShouldReturnShortUrlWhenIfItIsNotUsedBefore(t *testin
 func TestShortener_Shorten_ShouldReturnDifferentShortUrlWhenIfItIsUsedBefore(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	mockRepo := mocks.NewMockRepository(controller)
+	mockDB := mocks.NewMockDB(controller)
 	gomock.InOrder(
-		mockRepo.EXPECT().Set("05bf184", longURL).Return(errors.New("hash already exists")).Times(1),
-		mockRepo.EXPECT().Set("8d505df", longURL).Return(nil).Times(1),
+		mockDB.EXPECT().Set("05bf184", longURL).Return(errors.New("hash already exists")).Times(1),
+		mockDB.EXPECT().Set("8d505df", longURL).Return(nil).Times(1),
 	)
 
-	s := Shortener{Repository: mockRepo}
+	s := Shortener{DB: mockDB}
 	shortURL, err := s.Shorten(longURL)
 	expected := "/8d505df"
 	assert.Nil(t, err)
@@ -77,10 +71,10 @@ func TestShortener_Shorten_ShouldReturnDifferentShortUrlWhenIfItIsUsedBefore(t *
 func TestShortener_Expand_ShouldReturnErrorWhenHashNotFound(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	mockRepo := mocks.NewMockRepository(controller)
-	mockRepo.EXPECT().Get(gomock.Any()).Return("", errors.New("hash not found")).Times(1)
+	mockDB := mocks.NewMockDB(controller)
+	mockDB.EXPECT().Get(gomock.Any()).Return("", errors.New("hash not found")).Times(1)
 
-	s := Shortener{Repository: mockRepo}
+	s := Shortener{DB: mockDB}
 	hash := "05bf184"
 	longURL, err := s.Expand(hash)
 
@@ -91,10 +85,10 @@ func TestShortener_Expand_ShouldReturnErrorWhenHashNotFound(t *testing.T) {
 func TestShortener_Expand_ShouldReturnLongURL(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
-	mockRepo := mocks.NewMockRepository(controller)
-	mockRepo.EXPECT().Get(gomock.Any()).Return(longURL, nil).Times(1)
+	mockDB := mocks.NewMockDB(controller)
+	mockDB.EXPECT().Get(gomock.Any()).Return(longURL, nil).Times(1)
 
-	s := Shortener{Repository: mockRepo}
+	s := Shortener{DB: mockDB}
 	hash := "05bf184"
 	url, err := s.Expand(hash)
 

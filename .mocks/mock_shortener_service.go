@@ -10,31 +10,45 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockRepository is a mock of Repository interface.
-type MockRepository struct {
+// MockDB is a mock of DB interface.
+type MockDB struct {
 	ctrl     *gomock.Controller
-	recorder *MockRepositoryMockRecorder
+	recorder *MockDBMockRecorder
 }
 
-// MockRepositoryMockRecorder is the mock recorder for MockRepository.
-type MockRepositoryMockRecorder struct {
-	mock *MockRepository
+// MockDBMockRecorder is the mock recorder for MockDB.
+type MockDBMockRecorder struct {
+	mock *MockDB
 }
 
-// NewMockRepository creates a new mock instance.
-func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
-	mock := &MockRepository{ctrl: ctrl}
-	mock.recorder = &MockRepositoryMockRecorder{mock}
+// NewMockDB creates a new mock instance.
+func NewMockDB(ctrl *gomock.Controller) *MockDB {
+	mock := &MockDB{ctrl: ctrl}
+	mock.recorder = &MockDBMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
+func (m *MockDB) EXPECT() *MockDBMockRecorder {
 	return m.recorder
 }
 
+// Data mocks base method.
+func (m *MockDB) Data() map[string]string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Data")
+	ret0, _ := ret[0].(map[string]string)
+	return ret0
+}
+
+// Data indicates an expected call of Data.
+func (mr *MockDBMockRecorder) Data() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Data", reflect.TypeOf((*MockDB)(nil).Data))
+}
+
 // Get mocks base method.
-func (m *MockRepository) Get(arg0 string) (string, error) {
+func (m *MockDB) Get(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
 	ret0, _ := ret[0].(string)
@@ -43,13 +57,25 @@ func (m *MockRepository) Get(arg0 string) (string, error) {
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
+func (mr *MockDBMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRepository)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDB)(nil).Get), arg0)
+}
+
+// Restore mocks base method.
+func (m *MockDB) Restore(arg0 map[string]string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Restore", arg0)
+}
+
+// Restore indicates an expected call of Restore.
+func (mr *MockDBMockRecorder) Restore(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Restore", reflect.TypeOf((*MockDB)(nil).Restore), arg0)
 }
 
 // Set mocks base method.
-func (m *MockRepository) Set(arg0, arg1 string) error {
+func (m *MockDB) Set(arg0, arg1 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -57,7 +83,7 @@ func (m *MockRepository) Set(arg0, arg1 string) error {
 }
 
 // Set indicates an expected call of Set.
-func (mr *MockRepositoryMockRecorder) Set(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockDBMockRecorder) Set(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockRepository)(nil).Set), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockDB)(nil).Set), arg0, arg1)
 }

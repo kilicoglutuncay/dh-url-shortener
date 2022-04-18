@@ -7,12 +7,14 @@ import (
 
 type Shortener struct {
 	ShortURLDomain string
-	Repository     Repository
+	DB             DB
 }
 
-type Repository interface {
+type DB interface {
 	Get(string) (string, error)
 	Set(string, string) error
+	Data() map[string]string
+	Restore(map[string]string)
 }
 
 func (s Shortener) Shorten(url string) (string, error) {
@@ -33,7 +35,7 @@ func (s Shortener) createShortURLHash(url string, collisionCounter int) string {
 	hash := fmt.Sprintf("%x", sha256.Sum256(input))
 	shortHash := hash[:7]
 
-	if err := s.Repository.Set(shortHash, url); err != nil {
+	if err := s.DB.Set(shortHash, url); err != nil {
 		return s.createShortURLHash(url, collisionCounter+1)
 	}
 
@@ -45,7 +47,7 @@ func (s Shortener) createShortURL(hash string) string {
 }
 
 func (s Shortener) Expand(hash string) (string, error) {
-	url, err := s.Repository.Get(hash)
+	url, err := s.DB.Get(hash)
 	if err != nil {
 		return "", err
 	}

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"bytes"
-	"dh-url-shortener/repository"
+	"dh-url-shortener/db"
 	"dh-url-shortener/service"
 	"errors"
 	"fmt"
@@ -118,18 +118,17 @@ func TestShortenRequest_validate(t *testing.T) {
 
 // TestShortenerHandler_Create tests integration of short url creation process
 func TestShortenerHandler_Create(t *testing.T) {
-	data := make(map[string]string)
-	repo := repository.NewInMemoryRepository(data)
-	svc := service.Shortener{Repository: repo, ShortURLDomain: shortURLDomain}
+	InMemoryDB := db.NewInMemoryDB()
+	svc := service.Shortener{DB: InMemoryDB, ShortURLDomain: shortURLDomain}
 	handler := URLHandler{ShortenerService: svc}
 
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 	handler.Shorten(resp, req)
-
+	longURLInDB, _ := InMemoryDB.Get("05bf184")
 	assert.Equal(t, http.StatusCreated, resp.Code)
-	assert.Equal(t, shortURLDomain+"/6bf0d62", resp.Body.String())
-	assert.Equal(t, data["6bf0d62"], longURL)
+	assert.Equal(t, shortURLDomain+"/05bf184", resp.Body.String())
+	assert.Equal(t, longURL, longURLInDB)
 }
 
 func TestUrlHandler_Expand_ShouldReturnBadRequestWhenHashSmallerThanSevenChar(t *testing.T) {
