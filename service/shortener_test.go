@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	mocks "dh-url-shortener/.mocks"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,7 +37,7 @@ func TestShortener_Shorten_ShouldReturnFirstSevenCharsOfMd5Hash(t *testing.T) {
 	s := Shortener{Repository: mockRepo}
 	longURL := "https://www.yemeksepeti.com/istanbul"
 	shortURL, err := s.Shorten(longURL)
-	expected := "/6bf0d62"
+	expected := "/05bf184"
 	assert.Nil(t, err)
 	assert.Equal(t, expected, shortURL)
 }
@@ -51,23 +52,24 @@ func TestShortener_Shorten_ShouldReturnShortUrlWhenIfItIsNotUsedBefore(t *testin
 	s := Shortener{Repository: mockRepo}
 	longURL := "https://www.yemeksepeti.com/istanbul"
 	shortURL, err := s.Shorten(longURL)
-	expected := "/6bf0d62"
+	expected := "/05bf184"
 	assert.Nil(t, err)
 	assert.Equal(t, expected, shortURL)
 }
 
 // TestShortener_Shorten should return different short url when if short url already is used before
 func TestShortener_Shorten_ShouldReturnDifferentShortUrlWhenIfItIsUsedBefore(t *testing.T) {
-	longURL := "https://www.yemeksepeti.com/istanbul"
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 	mockRepo := mocks.NewMockRepository(controller)
-	mockRepo.EXPECT().Set("6bf0d62", longURL).Return(errors.New("hash already exists")).Times(1)
-	mockRepo.EXPECT().Set("11086bd", longURL).Return(nil).Times(1)
+	gomock.InOrder(
+		mockRepo.EXPECT().Set("05bf184", longURL).Return(errors.New("hash already exists")).Times(1),
+		mockRepo.EXPECT().Set("8d505df", longURL).Return(nil).Times(1),
+	)
 
 	s := Shortener{Repository: mockRepo}
 	shortURL, err := s.Shorten(longURL)
-	expected := "/11086bd"
+	expected := "/8d505df"
 	assert.Nil(t, err)
 	assert.Equal(t, expected, shortURL)
 }
@@ -79,7 +81,7 @@ func TestShortener_Expand_ShouldReturnErrorWhenHashNotFound(t *testing.T) {
 	mockRepo.EXPECT().Get(gomock.Any()).Return("", errors.New("hash not found")).Times(1)
 
 	s := Shortener{Repository: mockRepo}
-	hash := "6bf0d62"
+	hash := "05bf184"
 	longURL, err := s.Expand(hash)
 
 	assert.Error(t, err)
@@ -93,7 +95,7 @@ func TestShortener_Expand_ShouldReturnLongURL(t *testing.T) {
 	mockRepo.EXPECT().Get(gomock.Any()).Return(longURL, nil).Times(1)
 
 	s := Shortener{Repository: mockRepo}
-	hash := "6bf0d62"
+	hash := "05bf184"
 	url, err := s.Expand(hash)
 
 	assert.Nil(t, err)

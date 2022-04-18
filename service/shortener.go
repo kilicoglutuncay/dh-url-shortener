@@ -1,7 +1,7 @@
 package service
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"fmt"
 )
 
@@ -30,8 +30,8 @@ func (s Shortener) createShortURLHash(url string, collisionCounter int) string {
 	counter := []byte(fmt.Sprintf("%d", collisionCounter))
 	input = append(input, counter...)
 
-	md5Sum := fmt.Sprintf("%x", md5.Sum(input))
-	shortHash := md5Sum[:7]
+	hash := fmt.Sprintf("%x", sha256.Sum256(input))
+	shortHash := hash[:7]
 
 	if err := s.Repository.Set(shortHash, url); err != nil {
 		return s.createShortURLHash(url, collisionCounter+1)
