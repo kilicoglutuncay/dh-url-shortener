@@ -1,8 +1,8 @@
-package db
+package snapshot
 
 import (
-	"dh-url-shortener/model"
-	"dh-url-shortener/service"
+	"dh-url-shortener/internal/api/model"
+	"dh-url-shortener/internal/api/service"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -59,7 +59,7 @@ func (s Snapshot) Restore(db service.DB) error {
 func (s Snapshot) SavePeriodically(db service.DB) {
 	ticker := time.NewTicker(s.SnapshotSaveInterval)
 
-	for {
+	for { //nolint:gosimple
 		select {
 		case <-ticker.C:
 			err := s.snapshot(db)
@@ -67,6 +67,5 @@ func (s Snapshot) SavePeriodically(db service.DB) {
 				log.Fatalln(err)
 			}
 		}
-
 	}
 }

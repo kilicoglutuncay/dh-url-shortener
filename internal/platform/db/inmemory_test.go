@@ -1,7 +1,7 @@
 package db
 
 import (
-	"dh-url-shortener/model"
+	"dh-url-shortener/internal/api/model"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

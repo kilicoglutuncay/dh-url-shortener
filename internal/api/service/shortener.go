@@ -2,7 +2,7 @@ package service
 
 import (
 	"crypto/sha256"
-	"dh-url-shortener/model"
+	"dh-url-shortener/internal/api/model"
 	"fmt"
 )
 

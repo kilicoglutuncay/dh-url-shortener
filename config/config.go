@@ -18,7 +18,7 @@ func NewConfig(logger *log.Logger) *Config {
 		Addr:                 ":8080",
 		ShortURLDomain:       "http://localhost:8080",
 		Logger:               logger,
-		DBSnapshotPath:       "./db/snapshot.db",
+		DBSnapshotPath:       "./internal/platform/snapshot/snapshot.db",
 		SnapshotSaveInterval: 5 * time.Second,
 	}
 }

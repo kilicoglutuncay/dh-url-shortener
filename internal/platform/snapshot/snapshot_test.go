@@ -1,7 +1,8 @@
-package db
+package snapshot
 
 import (
-	"dh-url-shortener/model"
+	"dh-url-shortener/internal/api/model"
+	"dh-url-shortener/internal/platform/db"
 	"encoding/json"
 	"os"
 	"testing"
@@ -14,7 +15,7 @@ const testSnapshotFile = "test_snapshot.db"
 const testSnapshotInterval = time.Second * 5
 
 func TestNewSnapshot_Restore_ShouldNotReturnErrorWhenSnapshotFileCantOpen(t *testing.T) {
-	inMemDB := NewInMemoryDB()
+	inMemDB := db.NewInMemoryDB()
 	snapshot := NewSnapshot("not-existing-file-location", testSnapshotInterval)
 
 	err := snapshot.Restore(inMemDB)
@@ -24,7 +25,7 @@ func TestNewSnapshot_Restore_ShouldNotReturnErrorWhenSnapshotFileCantOpen(t *tes
 }
 
 func TestNewSnapshot_Restore_ShouldReturnErrorWhenFileContentIsNotEncodeable(t *testing.T) {
-	inMemDB := NewInMemoryDB()
+	inMemDB := db.NewInMemoryDB()
 	snapshot := NewSnapshot(testSnapshotFile, testSnapshotInterval)
 
 	writeDataToSnapshot(t, []byte("not encodeable"), testSnapshotFile)
@@ -36,7 +37,7 @@ func TestNewSnapshot_Restore_ShouldReturnErrorWhenFileContentIsNotEncodeable(t *
 }
 
 func TestSnapshot_Restore(t *testing.T) {
-	inMemDB := NewInMemoryDB()
+	inMemDB := db.NewInMemoryDB()
 	snapshot := NewSnapshot(testSnapshotFile, testSnapshotInterval)
 	testData := map[string]model.RedirectionData{
 		"key1": {OriginalURL: "value1"},

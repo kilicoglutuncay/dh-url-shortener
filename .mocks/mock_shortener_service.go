@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	model "dh-url-shortener/model"
+	model "dh-url-shortener/internal/api/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

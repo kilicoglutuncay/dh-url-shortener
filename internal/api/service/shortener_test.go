@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dh-url-shortener/model"
+	"dh-url-shortener/internal/api/model"
 	"errors"
 	"testing"
 

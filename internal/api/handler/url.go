@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"dh-url-shortener/model"
+	"dh-url-shortener/internal/api/model"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -80,6 +80,7 @@ type ShortenRequest struct {
 }
 
 type ShortenResponse struct {
+
 	URL string `json:"url"`
 }
 

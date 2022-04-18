@@ -2,9 +2,10 @@ package handler
 
 import (
 	"bytes"
-	"dh-url-shortener/db"
-	"dh-url-shortener/model"
-	"dh-url-shortener/service"
+	"dh-url-shortener/internal/api/model"
+	"dh-url-shortener/internal/api/service"
+	"dh-url-shortener/internal/platform/db"
+	"dh-url-shortener/internal/platform/snapshot"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -203,7 +204,7 @@ func BenchmarkURLHandler_Expand(b *testing.B) {
 	shortenerService := service.Shortener{DB: inMemoryDB, ShortURLDomain: "http://localhost:8080"}
 	h := URLHandler{ShortenerService: shortenerService}
 	_ = inMemoryDB.Set("05bf184", model.RedirectionData{OriginalURL: longURL, Hits: 0})
-	ss := db.NewSnapshot("../db/test_snapshot.db", time.Second*5)
+	ss := snapshot.NewSnapshot("../db/test_snapshot.db", time.Second*5)
 	_ = ss.Restore(inMemoryDB)
 	go ss.SavePeriodically(inMemoryDB)
 	b.ResetTimer()
@@ -216,5 +217,4 @@ func BenchmarkURLHandler_Expand(b *testing.B) {
 			h.Expand(resp, req)
 		}
 	})
-
 }
