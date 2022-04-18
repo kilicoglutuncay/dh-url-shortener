@@ -48,9 +48,8 @@ func (s Snapshot) Restore(db service.DB) error {
 	if len(byteValue) > 0 {
 		if err := json.Unmarshal(byteValue, &data); err != nil {
 			return err
-		} else {
-			db.Restore(data)
 		}
+		db.Restore(data)
 	}
 
 	return nil

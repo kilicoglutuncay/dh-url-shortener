@@ -20,7 +20,7 @@ func main() {
 	}
 	go snapshot.SavePeriodically(inMemoryDB)
 
-	shortenerService := service.Shortener{DB: inMemoryDB, ShortURLDomain: "http://localhost:8080"}
+	shortenerService := service.Shortener{DB: inMemoryDB, ShortURLDomain: c.ShortURLDomain}
 	h := handler.URLHandler{ShortenerService: shortenerService}
 
 	s.Post("/short", h.Shorten, s.AccessLogMiddleware)
