@@ -23,7 +23,7 @@ func TestHttpServer_AccessLogMiddleware(t *testing.T) {
 	}
 	handler := s.AccessLogMiddleware(nextHandler)
 
-	r, _ := http.NewRequest("GET", "http://localhost:8080/shorten", nil)
+	r, _ := http.NewRequest("GET", "http://localhost:8080/shorten", http.NoBody)
 	w := httptest.NewRecorder()
 	handler(w, r)
 	line := buf.String()

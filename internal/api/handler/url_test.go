@@ -65,7 +65,7 @@ func TestShortenerHandler_Shorten_ShouldReturnInternalServerErrorWhenShortenerSe
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%q"}`, longURL))))
 
 	handler.Shorten(resp, req)
 
@@ -82,7 +82,7 @@ func TestShortenerHandler_Shorten_ShortenedURL(t *testing.T) {
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%q"}`, longURL))))
 
 	handler.Shorten(resp, req)
 
@@ -128,7 +128,7 @@ func TestShortenerHandler_Create(t *testing.T) {
 	handler := URLHandler{ShortenerService: svc}
 
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%q"}`, longURL))))
 	handler.Shorten(resp, req)
 	redirectionData, _ := InMemoryDB.Get("05bf184")
 	expectedShortenedURL := fmt.Sprintf(`{"url":"%s/05bf184"}`, shortURLDomain)
@@ -213,7 +213,7 @@ func BenchmarkURLHandler_Expand(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			resp := httptest.NewRecorder()
-			req, _ := http.NewRequest(http.MethodGet, "/05bf184", nil)
+			req, _ := http.NewRequest(http.MethodGet, "/05bf184", http.NoBody)
 			h.Expand(resp, req)
 		}
 	})

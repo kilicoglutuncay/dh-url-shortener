@@ -80,7 +80,6 @@ type ShortenRequest struct {
 }
 
 type ShortenResponse struct {
-
 	URL string `json:"url"`
 }
 
