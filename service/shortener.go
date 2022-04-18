@@ -54,11 +54,19 @@ func (s Shortener) Expand(hash string) (string, error) {
 		return "", err
 	}
 
-	redirectionData.Hits++
 	err = s.DB.Hit(hash)
 	if err != nil {
 		return "", err
 	}
 
 	return redirectionData.OriginalURL, nil
+}
+
+func (s Shortener) List() []model.ListData {
+	data := s.DB.Data()
+	var list []model.ListData
+	for k, v := range data {
+		list = append(list, model.ListData{Hash: k, OriginalURL: v.OriginalURL, Hits: v.Hits})
+	}
+	return list
 }

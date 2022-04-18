@@ -44,6 +44,7 @@ func (s *HTTPServer) Post(path string, handler http.HandlerFunc, middlewares ...
 var (
 	shortenRe = regexp.MustCompile(`^/short/*$`)
 	expandRe  = regexp.MustCompile(`^/[a-z0-9A-Z]{7}$`)
+	listRe    = regexp.MustCompile(`^/list$`)
 )
 
 func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -52,6 +53,8 @@ func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.routeTable["POST /short"](w, r)
 	case r.Method == http.MethodGet && expandRe.MatchString(r.URL.Path):
 		s.routeTable["GET /"](w, r)
+	case r.Method == http.MethodGet && listRe.MatchString(r.URL.Path):
+		s.routeTable["GET /list"](w, r)
 	default:
 		http.NotFound(w, r)
 	}

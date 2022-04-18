@@ -97,6 +97,7 @@ func TestShortener_Expand_ShouldReturnLongURL(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, longURL, url)
 }
+
 func TestShortener_Expand_ShouldReturnErrorWhenCantIncreaseHit(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
@@ -110,4 +111,25 @@ func TestShortener_Expand_ShouldReturnErrorWhenCantIncreaseHit(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, "", url)
+}
+
+func TestShortener_List(t *testing.T) {
+	data := map[string]model.RedirectionData{
+		"05bf184": {OriginalURL: longURL, Hits: 5},
+		"8d505df": {OriginalURL: longURL, Hits: 10},
+	}
+
+	expectedResult := []model.ListData{
+		{OriginalURL: longURL, Hits: 5, Hash: "05bf184"},
+		{OriginalURL: longURL, Hits: 10, Hash: "8d505df"},
+	}
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	mockDB := mocks.NewMockDB(controller)
+	mockDB.EXPECT().Data().Return(data).Times(1)
+
+	s := Shortener{DB: mockDB}
+	actualResult := s.List()
+	assert.Equal(t, expectedResult, actualResult)
 }

@@ -25,6 +25,7 @@ func main() {
 
 	s.Post("/short", h.Shorten, s.AccessLogMiddleware)
 	s.Get("/", h.Expand, s.AccessLogMiddleware)
+	s.Get("/list", h.List, s.AccessLogMiddleware)
 
 	log.Fatal(s.ListenAndServe())
 }

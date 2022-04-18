@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"dh-url-shortener/model"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -14,9 +15,13 @@ type URLHandler struct {
 type ShortenerService interface {
 	Shorten(string) (string, error)
 	Expand(string) (string, error)
+	List() []model.ListData
 }
 
-const shortURLHashLength = 7
+const (
+	shortURLHashLength = 7
+	errInvalidURL      = "invalid url"
+)
 
 // Shorten creates a new short URL
 func (h URLHandler) Shorten(w http.ResponseWriter, r *http.Request) {
@@ -38,9 +43,7 @@ func (h URLHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	_, _ = w.Write([]byte(shortURL))
+	h.JSON(w, http.StatusCreated, &ShortenResponse{URL: shortURL})
 }
 
 func (h URLHandler) Expand(w http.ResponseWriter, r *http.Request) {
@@ -59,16 +62,31 @@ func (h URLHandler) Expand(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, longURL, http.StatusFound)
 }
 
-const ErrInvalidURL = "invalid url"
+func (h URLHandler) List(w http.ResponseWriter, _ *http.Request) {
+	listData := h.ShortenerService.List()
+	h.JSON(w, http.StatusOK, &listData)
+}
+
+func (h URLHandler) JSON(w http.ResponseWriter, statusCode int, data interface{}) {
+	resp, _ := json.Marshal(data)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	_, _ = w.Write(resp)
+}
 
 type ShortenRequest struct {
+	URL string `json:"url"`
+}
+
+type ShortenResponse struct {
 	URL string `json:"url"`
 }
 
 // Validate validates the ShortenRequest.URL field is a valid URL
 func (r ShortenRequest) validate() error {
 	if r.URL == "" {
-		return errors.New(ErrInvalidURL)
+		return errors.New(errInvalidURL)
 	} else if _, err := url.ParseRequestURI(r.URL); err != nil {
 		return err
 	}

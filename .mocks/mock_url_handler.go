@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	model "dh-url-shortener/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -46,6 +47,20 @@ func (m *MockShortenerService) Expand(arg0 string) (string, error) {
 func (mr *MockShortenerServiceMockRecorder) Expand(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Expand", reflect.TypeOf((*MockShortenerService)(nil).Expand), arg0)
+}
+
+// List mocks base method.
+func (m *MockShortenerService) List() []model.ListData {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List")
+	ret0, _ := ret[0].([]model.ListData)
+	return ret0
+}
+
+// List indicates an expected call of List.
+func (mr *MockShortenerServiceMockRecorder) List() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockShortenerService)(nil).List))
 }
 
 // Shorten mocks base method.

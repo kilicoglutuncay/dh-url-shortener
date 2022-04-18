@@ -3,7 +3,9 @@ package handler
 import (
 	"bytes"
 	"dh-url-shortener/db"
+	"dh-url-shortener/model"
 	"dh-url-shortener/service"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -32,7 +34,7 @@ func TestShortenerHandler_Shorten_ShouldReturnBadRequestWhenShortenRequestIsNotC
 	}
 	resp := httptest.NewRecorder()
 
-	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(`invalid json`)))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(`invalid json`)))
 
 	handler.Shorten(resp, req)
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
@@ -46,7 +48,7 @@ func TestShortenerHandler_Shorten_ShouldReturnBadRequestWhenShortenRequestIsNotV
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(`{"url": "invalid url"}`)))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(`{"url": "invalid url"}`)))
 
 	handler.Shorten(resp, req)
 
@@ -61,7 +63,7 @@ func TestShortenerHandler_Shorten_ShouldReturnInternalServerErrorWhenShortenerSe
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 
 	handler.Shorten(resp, req)
 
@@ -69,6 +71,7 @@ func TestShortenerHandler_Shorten_ShouldReturnInternalServerErrorWhenShortenerSe
 }
 
 func TestShortenerHandler_Shorten_ShortenedURL(t *testing.T) {
+	expectedShortenedURL := fmt.Sprintf(`{"url":"%s/tTeEsT"}`, shortURLDomain)
 	shortenedURL := shortURLDomain + "/tTeEsT"
 	controller := gomock.NewController(t)
 	defer controller.Finish()
@@ -77,12 +80,12 @@ func TestShortenerHandler_Shorten_ShortenedURL(t *testing.T) {
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 
 	handler.Shorten(resp, req)
 
 	assert.Equal(t, http.StatusCreated, resp.Code)
-	assert.Equal(t, shortenedURL, resp.Body.String())
+	assert.Equal(t, expectedShortenedURL, resp.Body.String())
 }
 
 func TestShortenRequest_validate(t *testing.T) {
@@ -123,18 +126,19 @@ func TestShortenerHandler_Create(t *testing.T) {
 	handler := URLHandler{ShortenerService: svc}
 
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
+	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL))))
 	handler.Shorten(resp, req)
 	redirectionData, _ := InMemoryDB.Get("05bf184")
+	expectedShortenedURL := fmt.Sprintf(`{"url":"%s/05bf184"}`, shortURLDomain)
 	assert.Equal(t, http.StatusCreated, resp.Code)
-	assert.Equal(t, shortURLDomain+"/05bf184", resp.Body.String())
+	assert.Equal(t, expectedShortenedURL, resp.Body.String())
 	assert.Equal(t, longURL, redirectionData.OriginalURL)
 }
 
 func TestUrlHandler_Expand_ShouldReturnBadRequestWhenHashSmallerThanSevenChar(t *testing.T) {
 	handler := URLHandler{}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	handler.Expand(resp, req)
 
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
@@ -149,7 +153,7 @@ func TestUrlHandler_Expand_ShouldReturnStatusNotFoundWhenServiceReturnsError(t *
 	handler := URLHandler{ShortenerService: mockShortenerService}
 
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/05bf184", nil)
+	req := httptest.NewRequest(http.MethodGet, "/05bf184", nil)
 	handler.Expand(resp, req)
 
 	assert.Equal(t, http.StatusNotFound, resp.Code)
@@ -164,8 +168,31 @@ func TestUrlHandler_Expand_ShouldReturnStatusFoundWhenServiceReturnsLongURL(t *t
 	handler := URLHandler{ShortenerService: mockShortenerService}
 
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/05bf184", nil)
+	req := httptest.NewRequest(http.MethodGet, "/05bf184", nil)
 	handler.Expand(resp, req)
 
 	assert.Equal(t, http.StatusFound, resp.Code)
+}
+
+func TestURLHandler_List(t *testing.T) {
+	testData := []model.ListData{
+		{
+			Hash:        "05bf184",
+			OriginalURL: longURL,
+			Hits:        4,
+		},
+	}
+	expectedResp, _ := json.Marshal(testData)
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	mockShortenerService := mocks.NewMockShortenerService(controller)
+	mockShortenerService.EXPECT().List().Return(testData).Times(1)
+	handler := URLHandler{ShortenerService: mockShortenerService}
+	resp := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/list", nil)
+	handler.List(resp, req)
+
+	assert.Equal(t, http.StatusOK, resp.Code)
+	assert.Equal(t, string(expectedResp), resp.Body.String())
 }

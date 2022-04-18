@@ -65,6 +65,5 @@ func (s Snapshot) SavePeriodically(db service.DB) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Println("Snapshot saved")
 	}
 }
