@@ -6,11 +6,13 @@ import (
 	"sync"
 )
 
+// InMemoryDB is an in-memory implementation of the DB interface
 type InMemoryDB struct {
 	data  map[string]model.RedirectionData
 	mutex sync.RWMutex
 }
 
+// NewInMemoryDB creates a new in-memory DB
 func NewInMemoryDB() *InMemoryDB {
 	repo := &InMemoryDB{
 		data:  make(map[string]model.RedirectionData),
@@ -20,6 +22,7 @@ func NewInMemoryDB() *InMemoryDB {
 	return repo
 }
 
+// Get retrieves a model.RedirectionData from the DB with the given key
 func (i *InMemoryDB) Get(key string) (model.RedirectionData, error) {
 	i.mutex.RLock()
 	defer i.mutex.RUnlock()
@@ -29,6 +32,7 @@ func (i *InMemoryDB) Get(key string) (model.RedirectionData, error) {
 	return model.RedirectionData{}, errors.New(key + " not found")
 }
 
+// Set stores a model.RedirectionData in the DB with the given key
 func (i *InMemoryDB) Set(key string, value model.RedirectionData) error {
 	i.mutex.Lock()
 	defer i.mutex.Unlock()
@@ -39,6 +43,7 @@ func (i *InMemoryDB) Set(key string, value model.RedirectionData) error {
 	return nil
 }
 
+// Hit increments the hit count of the model.RedirectionData with the given key
 func (i *InMemoryDB) Hit(key string) error {
 	i.mutex.Lock()
 	defer i.mutex.Unlock()
@@ -51,12 +56,14 @@ func (i *InMemoryDB) Hit(key string) error {
 	return nil
 }
 
+// Data returns the in-memory DB data
 func (i *InMemoryDB) Data() map[string]model.RedirectionData {
 	i.mutex.RLock()
 	defer i.mutex.RUnlock()
 	return i.data
 }
 
+// Restore restores the in-memory DB data from the given data
 func (i *InMemoryDB) Restore(data map[string]model.RedirectionData) {
 	i.mutex.RLock()
 	defer i.mutex.RUnlock()

@@ -23,7 +23,7 @@ const (
 	errInvalidURL      = "invalid url"
 )
 
-// Shorten creates a new short URL
+// Shorten handles requests which are aim to shorten long URL.
 func (h URLHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 	var sr ShortenRequest
 	err := json.NewDecoder(r.Body).Decode(&sr)
@@ -43,9 +43,10 @@ func (h URLHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.JSON(w, http.StatusCreated, &ShortenResponse{URL: shortURL})
+	h.json(w, http.StatusCreated, &ShortenResponse{URL: shortURL})
 }
 
+// Expand expands the given short URL to its long URL.
 func (h URLHandler) Expand(w http.ResponseWriter, r *http.Request) {
 	hash := r.URL.Path[1:]
 	if len(hash) != shortURLHashLength {
@@ -62,12 +63,14 @@ func (h URLHandler) Expand(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, longURL, http.StatusFound)
 }
 
+// List returns a list of all stored URLs with their hits.
 func (h URLHandler) List(w http.ResponseWriter, _ *http.Request) {
 	listData := h.ShortenerService.List()
-	h.JSON(w, http.StatusOK, &listData)
+	h.json(w, http.StatusOK, &listData)
 }
 
-func (h URLHandler) JSON(w http.ResponseWriter, statusCode int, data interface{}) {
+// json encodes the given data to JSON and writes it to the response writer.
+func (h URLHandler) json(w http.ResponseWriter, statusCode int, data interface{}) {
 	resp, _ := json.Marshal(data)
 
 	w.Header().Set("Content-Type", "application/json")

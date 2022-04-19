@@ -10,11 +10,13 @@ import (
 	"time"
 )
 
+// Snapshot saves and restores the state of the database.
 type Snapshot struct {
 	SnapshotPath         string
 	SnapshotSaveInterval time.Duration
 }
 
+// NewSnapshot creates a new snapshot object.
 func NewSnapshot(snapshotPath string, snapshotSaveInterval time.Duration) *Snapshot {
 	return &Snapshot{
 		SnapshotPath:         snapshotPath,
@@ -22,6 +24,7 @@ func NewSnapshot(snapshotPath string, snapshotSaveInterval time.Duration) *Snaps
 	}
 }
 
+// Save saves the current state of the database to SnapshotPath.
 func (s Snapshot) snapshot(db service.DB) error {
 	file, err := os.OpenFile(s.SnapshotPath, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -37,6 +40,7 @@ func (s Snapshot) snapshot(db service.DB) error {
 	return nil
 }
 
+// Restore restores the state of the database from SnapshotPath.
 func (s Snapshot) Restore(db service.DB) error {
 	file, err := os.OpenFile(s.SnapshotPath, os.O_RDONLY, os.ModePerm)
 	if err != nil {
@@ -56,6 +60,7 @@ func (s Snapshot) Restore(db service.DB) error {
 	return nil
 }
 
+// SavePeriodically saves the state of the database within each SnapshotSaveInterval.
 func (s Snapshot) SavePeriodically(db service.DB) {
 	ticker := time.NewTicker(s.SnapshotSaveInterval)
 
