@@ -1,6 +1,6 @@
 # dh-url-shortener
 [![codecov](https://codecov.io/github/kilicoglutuncay/dh-url-shortener/branch/master/graph/badge.svg?token=Lc1XnvB6YE)](https://codecov.io/github/kilicoglutuncay/dh-url-shortener)
-[![pipeline](https://github.com/kilicoglutuncay/dh-url-shortener/workflows/main/badge.svg)](https://github.com/kilicoglutuncay/dh-url-shortener/actions?query=workflows%3Amain)
+[![pipeline](https://github.com/kilicoglutuncay/dh-url-shortener/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/kilicoglutuncay/dh-url-shortener/actions/workflows/main.yml)
 ## Getting Started
 Url shortener makes it easy to shorten long urls.  
 Stores data in memory and supports snapshotting of data to file periodically. Also restores data from snapshot.
