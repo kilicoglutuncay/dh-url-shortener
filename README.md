@@ -1,8 +1,8 @@
 # dh-url-shortener
 [![codecov](https://codecov.io/github/kilicoglutuncay/dh-url-shortener/branch/master/graph/badge.svg?token=Lc1XnvB6YE)](https://codecov.io/github/kilicoglutuncay/dh-url-shortener)
 ## Getting Started
-Url shortener makes it easy to shorten long urls. 
-Stores data in memory and supports snapshotting of data periodically. Also restores data from snapshot.
+Url shortener makes it easy to shorten long urls.  
+Stores data in memory and supports snapshotting of data to file periodically. Also restores data from snapshot.
 
 
 ## Running 
