@@ -3,8 +3,6 @@ package main
 import (
 	"dh-url-shortener/config"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"regexp"
 )
@@ -25,7 +23,6 @@ func NewHTTPServer(c *config.Config) *HTTPServer {
 		Config:     c,
 	}
 
-	server.Get("/health", server.healthHandler, server.AccessLogMiddleware)
 	return server
 }
 
@@ -49,17 +46,10 @@ func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if expandRe.MatchString(r.URL.Path) {
 			handler = s.routeTable["GET /:hash"]
 		} else {
-			http.NotFound(w, r)
+			handler = http.NotFound
 		}
 	}
 	handler(w, r)
-}
-
-func (s *HTTPServer) healthHandler(w http.ResponseWriter, _ *http.Request) {
-	_, err := io.WriteString(w, "OK")
-	if err != nil {
-		log.Fatalln(err)
-	}
 }
 
 func (s *HTTPServer) ListenAndServe() error {
