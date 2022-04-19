@@ -2,4 +2,4 @@
 .vscode/
 dh-url-shortener
 coverage.out
-internal/**/*.db
+**/*.db
