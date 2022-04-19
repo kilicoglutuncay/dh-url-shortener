@@ -133,3 +133,18 @@ func TestShortener_List(t *testing.T) {
 	actualResult := s.List()
 	assert.Equal(t, expectedResult, actualResult)
 }
+
+func TestShortener_List_ShouldReturnJSONArrayWhenDbIsEmpty(t *testing.T) {
+	data := map[string]model.RedirectionData{}
+
+	expectedResult := make([]model.ListData, 0, 1)
+
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	mockDB := mocks.NewMockDB(controller)
+	mockDB.EXPECT().Data().Return(data).Times(1)
+
+	s := Shortener{DB: mockDB}
+	actualResult := s.List()
+	assert.Equal(t, expectedResult, actualResult)
+}
