@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	go snapshot.SavePeriodically(inMemoryDB)
+	go snapshot.SavePeriodically(inMemoryDB, nil)
 
 	shortenerService := service.Shortener{DB: inMemoryDB, ShortURLDomain: c.ShortURLDomain}
 	h := handler.URLHandler{ShortenerService: shortenerService}

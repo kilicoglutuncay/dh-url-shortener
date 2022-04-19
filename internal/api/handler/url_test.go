@@ -206,7 +206,7 @@ func BenchmarkURLHandler_Expand(b *testing.B) {
 	_ = inMemoryDB.Set("05bf184", model.RedirectionData{OriginalURL: longURL, Hits: 0})
 	ss := snapshot.NewSnapshot("../db/test_snapshot.db", time.Second*5)
 	_ = ss.Restore(inMemoryDB)
-	go ss.SavePeriodically(inMemoryDB)
+	go ss.SavePeriodically(inMemoryDB, nil)
 	b.ResetTimer()
 	b.ReportAllocs()
 	b.SetParallelism(16000)

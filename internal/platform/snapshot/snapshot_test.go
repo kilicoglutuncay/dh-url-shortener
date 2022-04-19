@@ -12,7 +12,7 @@ import (
 )
 
 const testSnapshotFile = "test_snapshot.db"
-const testSnapshotInterval = time.Second * 5
+const testSnapshotInterval = time.Second * 2
 
 func TestNewSnapshot_Restore_ShouldNotReturnErrorWhenSnapshotFileCantOpen(t *testing.T) {
 	inMemDB := db.NewInMemoryDB()
@@ -50,6 +50,35 @@ func TestSnapshot_Restore(t *testing.T) {
 	err := snapshot.Restore(inMemDB)
 	assert.Nil(t, err)
 	assert.Equal(t, testData, inMemDB.Data())
+}
+
+func TestSnapshot_SavePeriodically(t *testing.T) {
+	inMemDB := db.NewInMemoryDB()
+	inMemDB2 := db.NewInMemoryDB()
+	snapshot := NewSnapshot(testSnapshotFile, testSnapshotInterval)
+	testData := map[string]model.RedirectionData{
+		"key1": {OriginalURL: "value1"},
+		"key2": {OriginalURL: "value2"},
+		"key3": {OriginalURL: "value3"},
+	}
+	inMemDB.Restore(testData)
+	stopTimerCh := make(chan bool)
+	time.AfterFunc(testSnapshotInterval+time.Second*1, func() {
+		stopTimerCh <- true
+	})
+	snapshot.SavePeriodically(inMemDB, stopTimerCh)
+
+	defer os.Remove(testSnapshotFile)
+	inMemDB2.Restore(testData)
+	assert.Equal(t, testData, inMemDB2.Data())
+	assert.FileExists(t, testSnapshotFile)
+}
+
+func TestSnapshot_snapshot_ShouldReturnErrorWhenFileCanNotOpenForWrite(t *testing.T) {
+	inMemDB := db.NewInMemoryDB()
+	snapshot := NewSnapshot("", testSnapshotInterval)
+	err := snapshot.snapshot(inMemDB)
+	assert.Error(t, err)
 }
 
 func writeDataToSnapshot(t *testing.T, data []byte, snapshotPath string) {

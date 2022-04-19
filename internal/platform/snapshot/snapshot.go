@@ -32,10 +32,7 @@ func (s Snapshot) snapshot(db service.DB) error {
 	}
 	defer file.Close()
 
-	err = json.NewEncoder(file).Encode(db.Data())
-	if err != nil {
-		return err
-	}
+	_ = json.NewEncoder(file).Encode(db.Data())
 
 	return nil
 }
@@ -61,16 +58,19 @@ func (s Snapshot) Restore(db service.DB) error {
 }
 
 // SavePeriodically saves the state of the database within each SnapshotSaveInterval.
-func (s Snapshot) SavePeriodically(db service.DB) {
+func (s Snapshot) SavePeriodically(db service.DB, stop chan bool) {
 	ticker := time.NewTicker(s.SnapshotSaveInterval)
 
-	for { //nolint:gosimple
+	for {
 		select {
 		case <-ticker.C:
 			err := s.snapshot(db)
 			if err != nil {
 				log.Fatalln(err)
 			}
+		case <-stop:
+			ticker.Stop()
+			return
 		}
 	}
 }
