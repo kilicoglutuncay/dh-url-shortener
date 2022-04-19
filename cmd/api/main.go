@@ -6,12 +6,14 @@ import (
 	"dh-url-shortener/internal/api/service"
 	"dh-url-shortener/internal/platform/db"
 	dbSnapshot "dh-url-shortener/internal/platform/snapshot"
+	"fmt"
 	"log"
 	"os"
 )
 
 func main() {
 	c := config.NewConfig(log.New(os.Stdout, "", log.LstdFlags))
+	fmt.Printf("Config: %#v\n", c)
 	s := NewHTTPServer(c)
 	inMemoryDB := db.NewInMemoryDB()
 	snapshot := dbSnapshot.NewSnapshot(c.DBSnapshotPath, c.SnapshotSaveInterval)
