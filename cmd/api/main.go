@@ -25,7 +25,7 @@ func main() {
 	h := handler.URLHandler{ShortenerService: shortenerService}
 
 	s.Post("/short", h.Shorten, s.AccessLogMiddleware)
-	s.Get("/", h.Expand, s.AccessLogMiddleware)
+	s.Get("/:hash", h.Expand, s.AccessLogMiddleware)
 	s.Get("/list", h.List, s.AccessLogMiddleware)
 
 	log.Fatal(s.ListenAndServe())

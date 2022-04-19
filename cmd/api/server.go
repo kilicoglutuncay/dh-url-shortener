@@ -9,6 +9,8 @@ import (
 	"regexp"
 )
 
+var expandRe = regexp.MustCompile(`^/[a-z0-9A-Z]{7}$`)
+
 type HTTPServer struct {
 	ServerMux  *http.ServeMux
 	routeTable map[string]http.HandlerFunc
@@ -41,26 +43,19 @@ func (s *HTTPServer) Post(path string, handler http.HandlerFunc, middlewares ...
 	s.routeTable[http.MethodPost+" "+path] = handler
 }
 
-var (
-	shortenRe = regexp.MustCompile(`^/short/*$`)
-	expandRe  = regexp.MustCompile(`^/[a-z0-9A-Z]{7}$`)
-	listRe    = regexp.MustCompile(`^/list$`)
-)
-
 func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch {
-	case r.Method == http.MethodPost && shortenRe.MatchString(r.URL.Path):
-		s.routeTable["POST /short"](w, r)
-	case r.Method == http.MethodGet && expandRe.MatchString(r.URL.Path):
-		s.routeTable["GET /"](w, r)
-	case r.Method == http.MethodGet && listRe.MatchString(r.URL.Path):
-		s.routeTable["GET /list"](w, r)
-	default:
-		http.NotFound(w, r)
+	handler, ok := s.routeTable[r.Method+" "+r.URL.Path]
+	if !ok {
+		if expandRe.MatchString(r.URL.Path) {
+			handler = s.routeTable["GET /:hash"]
+		} else {
+			http.NotFound(w, r)
+		}
 	}
+	handler(w, r)
 }
 
-func (s *HTTPServer) healthHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HTTPServer) healthHandler(w http.ResponseWriter, _ *http.Request) {
 	_, err := io.WriteString(w, "OK")
 	if err != nil {
 		log.Fatalln(err)
