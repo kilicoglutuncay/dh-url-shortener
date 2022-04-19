@@ -9,5 +9,5 @@ RUN GOOS=linux CGO_ENABLED=0 go build ./cmd/api
 FROM alpine
 
 COPY --from=build /app/api ./api
-
+EXPOSE 8080
 CMD [ "./api" ]
