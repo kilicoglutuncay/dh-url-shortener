@@ -17,6 +17,11 @@ Run the following command to start the shortener api in container:
 docker run -p 8080:8080 -it tujix/url-shortener:latest
 ```
 
+You can also change the app address and short domain url to your liking thank to passing them as env variable.
+```
+docker run -p 8080:8090 -it -e APP_ADDR=":8090" -e SHORT_URL_DOMAIN=https://tujix.me tujix/url-shortener:latest
+```
+
 Shorten URL request:
 
 ```
@@ -53,3 +58,5 @@ List response:
     }
 ]
 ```
+
+Latest version of url shortener api is available on [tujix.me](https://tujix.me) with /
