@@ -8,7 +8,7 @@ metadata:
     name: url-shortener-ingress
 spec:
   rules:
-  - host: shrt.ly
+  - host: tujix.me
     http:
       paths:
       - pathType: Prefix
