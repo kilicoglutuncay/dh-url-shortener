@@ -116,12 +116,10 @@ func TestShortener_Expand_ShouldReturnErrorWhenCantIncreaseHit(t *testing.T) {
 func TestShortener_List(t *testing.T) {
 	data := map[string]model.RedirectionData{
 		"05bf184": {OriginalURL: longURL, Hits: 5},
-		"8d505df": {OriginalURL: longURL, Hits: 10},
 	}
 
 	expectedResult := []model.ListData{
 		{OriginalURL: longURL, Hits: 5, Hash: "05bf184"},
-		{OriginalURL: longURL, Hits: 10, Hash: "8d505df"},
 	}
 
 	controller := gomock.NewController(t)
