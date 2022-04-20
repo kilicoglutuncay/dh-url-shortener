@@ -59,4 +59,4 @@ List response:
 ]
 ```
 
-Latest version of url shortener api is available on [tujix.me](https://tujix.me) with /
+Latest version of url shortener api is available on [tujix.me](http://tujix.me/list)
