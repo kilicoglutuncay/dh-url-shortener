@@ -36,7 +36,7 @@ func TestShortenerHandler_Shorten_ShouldReturnBadRequestWhenShortenRequestIsNotC
 	}
 	resp := httptest.NewRecorder()
 
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(`invalid json`)))
+	req := httptest.NewRequest(http.MethodPost, "/shorten", bytes.NewReader([]byte(`invalid json`)))
 
 	handler.Shorten(resp, req)
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
@@ -50,7 +50,7 @@ func TestShortenerHandler_Shorten_ShouldReturnBadRequestWhenShortenRequestIsNotV
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(`{"url": "invalid url"}`)))
+	req := httptest.NewRequest(http.MethodPost, "/shorten", bytes.NewReader([]byte(`{"url": "invalid url"}`)))
 
 	handler.Shorten(resp, req)
 
@@ -65,7 +65,7 @@ func TestShortenerHandler_Shorten_ShouldReturnInternalServerErrorWhenShortenerSe
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL)))) // nolint:gocritic
+	req := httptest.NewRequest(http.MethodPost, "/shorten", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL)))) // nolint:gocritic
 
 	handler.Shorten(resp, req)
 
@@ -82,7 +82,7 @@ func TestShortenerHandler_Shorten_ShortenedURL(t *testing.T) {
 
 	handler := URLHandler{ShortenerService: mockShortenerService}
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL)))) // nolint:gocritic
+	req := httptest.NewRequest(http.MethodPost, "/shorten", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL)))) // nolint:gocritic
 
 	handler.Shorten(resp, req)
 
@@ -128,7 +128,7 @@ func TestShortenerHandler_Create(t *testing.T) {
 	handler := URLHandler{ShortenerService: svc}
 
 	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/short", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL)))) // nolint:gocritic
+	req := httptest.NewRequest(http.MethodPost, "/shorten", bytes.NewReader([]byte(fmt.Sprintf(`{"url": "%s"}`, longURL)))) // nolint:gocritic
 	handler.Shorten(resp, req)
 	redirectionData, _ := InMemoryDB.Get("05bf184")
 	expectedShortenedURL := fmt.Sprintf(`{"url":"%s/05bf184"}`, shortURLDomain)

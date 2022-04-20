@@ -26,7 +26,7 @@ func main() {
 	shortenerService := service.Shortener{DB: inMemoryDB, ShortURLDomain: c.ShortURLDomain}
 	h := handler.URLHandler{ShortenerService: shortenerService}
 
-	s.Post("/short", h.Shorten, s.AccessLogMiddleware)
+	s.Post("/shorten", h.Shorten, s.AccessLogMiddleware)
 	s.Get("/:hash", h.Expand, s.AccessLogMiddleware)
 	s.Get("/list", h.List, s.AccessLogMiddleware)
 
