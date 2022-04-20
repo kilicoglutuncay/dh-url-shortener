@@ -22,4 +22,7 @@ spec:
             cpu: "50m"
         ports:
         - containerPort: 8080
+        env:
+          - name: SHORT_URL_DOMAIN
+            value: http://tujix.me
 
